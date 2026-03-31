@@ -311,7 +311,7 @@ makeTOPX3Columns <- function(filePath, savePath = "EVs"){
     ###### Missed Cues ######
     # select trials with missed cue or probe
     dat_cue_miss <- filter(dat_half, is.na(response_cue) & is.na(response_cue_focus) |
-                             is.na(response_cue) & is.na(response_cue_focus)) # ask Becca about this
+                             is.na(response_probe) & is.na(response_probe_focus))
     # catches trials where the two halves were not split properly
     dat_cue_miss <- filter(dat_cue_miss, !is.na(onset_cue))
     dat_cue_miss$tcf_cue_miss_dur <- ((dat_cue_miss$duration_cue + dat_cue_miss$duration_cue_focus)/1000)
@@ -352,11 +352,71 @@ makeTOPX3Columns <- function(filePath, savePath = "EVs"){
   } #end of run loop
 } #end of function
 
-#### Using the function ####
+#### Using the function - Example ####
 
 # Port in variables of interest
 # source("STEP_TOPX_make_3cols.R") # don't need this step unless running function in separate script
-filePath <- "TOPX behavioral RAW/SP1105_TOPX_BL2_20230913.txt"
-makeTOPX3Columns(filePath)
+#filePath <- "TOPX behavioral RAW/SP1001_TOPX_6M_20221019.txt"
+#makeTOPX3Columns(filePath)
 # defaults output/"save path" to "EVs/task-topx1_rec-NORDIC_run-1_part-mag_bold" (run 1) & "EVs/task-topx2_rec-NORDIC_run-2_part-mag_bold", (run 2)
 # but can enter an alternate savePath (replaces "EVs"), e.g., makeTOPX3Columns(filePath, savePath = newPath)
+
+#input: ~/Library/CloudStorage/Box-Box/STEP-P50/Reporting & Data Submission/MRI Task Data/TOPX Scanner Behavioral Data + Analyses/TOPX behavioral RAW
+# output: ~/Library/CloudStorage/Box-Box/STEP-P50/Reporting & Data Submission/MRI Task Data/TOPX Scanner Behavioral Data + Analyses/EVs
+
+####  Using the function - Actual ######
+
+# set working directory
+setwd("/Users/arend103/Library/CloudStorage/Box-Box/STEP-P50/Reporting & Data Submission/MRI Task Data/TOPX Scanner Behavioral Data + Analyses")
+
+# read in all the file names of TOPX raw data
+txt_files <- list.files("/Users/arend103/Library/CloudStorage/Box-Box/STEP-P50/Reporting & Data Submission/MRI Task Data/TOPX Scanner Behavioral Data + Analyses/TOPX behavioral RAW",
+  pattern = "\\.txt$",
+  full.names = TRUE)
+
+# filter to only keep 6-Month files
+txt_files_6M <- grep("6M", txt_files, value = TRUE)
+
+# filePath <- "/Users/arend103/Library/CloudStorage/Box-Box/STEP-P50/Reporting & Data Submission/MRI Task Data/TOPX Scanner Behavioral Data + Analyses/TOPX behavioral RAW/SP1001_TOPX_6M_20221019.txt"
+# filePath <- "/Users/arend103/Library/CloudStorage/Box-Box/STEP-P50/Reporting & Data Submission/MRI Task Data/TOPX Scanner Behavioral Data + Analyses/TOPX behavioral RAW/SP1003_TOPX_6M_20220819.txt"
+# filePath <- "/Users/arend103/Library/CloudStorage/Box-Box/STEP-P50/Reporting & Data Submission/MRI Task Data/TOPX Scanner Behavioral Data + Analyses/TOPX behavioral RAW/SP1116_TOPX_6M_20250122.txt"
+# filePath <- "/Users/arend103/Library/CloudStorage/Box-Box/STEP-P50/Reporting & Data Submission/MRI Task Data/TOPX Scanner Behavioral Data + Analyses/TOPX behavioral RAW/SP1120_TOPX_6M_20250425.txt"
+# filePath <- "/Users/arend103/Library/CloudStorage/Box-Box/STEP-P50/Reporting & Data Submission/MRI Task Data/TOPX Scanner Behavioral Data + Analyses/TOPX behavioral RAW/SP1121_TOPX_6M_20250513.txt"
+# makeTOPX3Columns(filePath, savePath = "EVs")
+
+## run iteratively
+# for (filePath in txt_files_6M) {
+#   message("Processing: ", basename(filePath))
+#   makeTOPX3Columns(filePath, savePath = "EVs")
+# }
+
+# script returned error for specific file, remove it
+txt_files_6M <- txt_files_6M[basename(txt_files_6M) != "SP1109_TOPX_6M_20240804 (1).txt"]
+# the other file ran, likely not full TOPX run... investigate this later
+
+# to move forward, remove all files with below a certain ID number (already ran)
+# Extract just the filenames
+fn <- basename(txt_files_6M)
+# Extract the numeric part after "SP"
+sp_num <- as.numeric(sub("SP([0-9]{4}).*", "\\1", fn))
+txt_files_6M <- txt_files_6M[sp_num >= 1109]
+
+# start running iteratively again
+for (filePath in txt_files_6M) {
+  message("Processing: ", basename(filePath))
+  makeTOPX3Columns(filePath, savePath = "EVs")
+}
+
+# script returned error for specific file, remove it
+txt_files_6M <- txt_files_6M[basename(txt_files_6M) != "SP2087_TOPX_6M_20231117.txt"]
+
+# remove all files already ran
+txt_files_6M <- txt_files_6M[sp_num >= 2087]
+
+# start running iteratively again
+for (filePath in txt_files_6M) {
+  message("Processing: ", basename(filePath))
+  makeTOPX3Columns(filePath, savePath = "EVs")
+}
+
+# done! ended at SP2285_TOPX_6M_20250905
