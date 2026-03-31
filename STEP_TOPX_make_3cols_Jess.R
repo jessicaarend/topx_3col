@@ -377,11 +377,22 @@ txt_files <- list.files("/Users/arend103/Library/CloudStorage/Box-Box/STEP-P50/R
 # filter to only keep 6-Month files
 txt_files_6M <- grep("6M", txt_files, value = TRUE)
 
+# Save to a text file, one per line
+writeLines(subject_ids_sub, "subject_ids_sub.txt")
+
 # run iteratively
 for (filePath in txt_files_6M) {
   message("Processing: ", basename(filePath))
   makeTOPX3Columns(filePath, savePath = "EVs")
 }
+
+# save list of only subject IDs, for subject list in fMRI analyses 
+# (e.g., subs_6m_YYYYMMDD_basic.txt)
+fn <- basename(txt_files_6M)
+(subject_ids <- sub("^(SP[0-9]{4}).*$", "\\1", fn))
+subject_ids <- paste0("sub-", subject_ids)
+writeLines(subject_ids,
+           "/Users/arend103/Documents/umn_work/analyses/topx_analyses/topx_3col/topx_subject_ids_6m.txt")
 
 # # as needed, remove single files that break the script
 # txt_files_6M <- txt_files_6M[basename(txt_files_6M) != "SP1109_TOPX_6M_20240804 (1).txt"]
